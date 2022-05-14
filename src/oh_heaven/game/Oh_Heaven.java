@@ -107,13 +107,13 @@ public class Oh_Heaven extends CardGame {
   public void setStatus(String string) { setStatusText(string); }
   
 private int[] scores = new int[nbPlayers];
-private int[] tricks = new int[nbPlayers]; // 理解：记录当前round赢了多少回
+private int[] tricks = new int[nbPlayers]; // 理解：记录当前round赢了多少trick
 private int[] bids = new int[nbPlayers]; // 理解：猜自己能赢多少trick
 
 Font bigFont = new Font("Serif", Font.BOLD, 36);
 
 private void initScore() {
-	// 理解：初始化分数（as actor）
+	// 理解：初始化分数 -> 屏幕显示
 	 for (int i = 0; i < nbPlayers; i++) {
 		 // scores[i] = 0;
 		 String text = "[" + String.valueOf(scores[i]) + "]" + String.valueOf(tricks[i]) + "/" + String.valueOf(bids[i]);
@@ -123,7 +123,7 @@ private void initScore() {
   }
 
 private void updateScore(int player) {
-	// 理解：更新分数
+	// 理解：更新分数 -> 屏幕显示
 	removeActor(scoreActors[player]);
 	String text = "[" + String.valueOf(scores[player]) + "]" + String.valueOf(tricks[player]) + "/" + String.valueOf(bids[player]);
 	scoreActors[player] = new TextActor(text, Color.WHITE, bgColor, bigFont);
@@ -131,20 +131,22 @@ private void updateScore(int player) {
 }
 
 private void initScores() {
-	// 理解：初始化分数值为0
+	// 理解：初始化分数的值
 	 for (int i = 0; i < nbPlayers; i++) {
 		 scores[i] = 0;
 	 }
 }
 
 private void updateScores() {
+	// 理解：更新分数的值
 	 for (int i = 0; i < nbPlayers; i++) {
 		 scores[i] += tricks[i];
-		 if (tricks[i] == bids[i]) scores[i] += madeBidBonus;
+		 if (tricks[i] == bids[i]) scores[i] += madeBidBonus; // 理解：如果回合结束，trick数=bid数，额外加10分
 	 }
 }
 
 private void initTricks() {
+	// 理解：初始化所有玩家trick值为0
 	 for (int i = 0; i < nbPlayers; i++) {
 		 tricks[i] = 0;
 	 }
@@ -152,13 +154,17 @@ private void initTricks() {
 
 private void initBids(Suit trumps, int nextPlayer) {
 	int total = 0;
+	// 理解：nextPlayer初始时为开始玩家，例如：开始为2号玩家，则循环 i=2;i<6（2+4）;i++，正好循环4次
 	for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
+		// 理解：iP=nextPlayer是几号玩家。i % nbPlayers，例如：i=5，则5 % 4 = 1，说明nextPlayer=5为1号玩家
 		 int iP = i % nbPlayers;
+		 // 理解：nbStartCards=13，13/4=3，再随机加0或1，则玩家的bid随机等于3或4
 		 bids[iP] = nbStartCards / 4 + random.nextInt(2);
-		 total += bids[iP];
+		 total += bids[iP]; // 理解：计算所有人bids总数
 	 }
+	// 理解： 假设total bids等于13，则需要让最后一个玩家bid变大/变小（每round出一张牌，一共13把在一个round里，因此total=13意味着每个人都可能达到bid）
 	 if (total == nbStartCards) {  // Force last bid so not every bid possible
-		 int iP = (nextPlayer + nbPlayers) % nbPlayers;
+		 int iP = (nextPlayer + nbPlayers) % nbPlayers; // 理解：计算最后一个玩家是几号玩家
 		 if (bids[iP] == 0) {
 			 bids[iP] = 1;
 		 } else {
@@ -174,12 +180,13 @@ private Card selected;
 
 private void initRound() {
 		hands = new Hand[nbPlayers];
+		// 理解：为每个玩家分牌
 		for (int i = 0; i < nbPlayers; i++) {
 			   hands[i] = new Hand(deck);
 		}
 		dealingOut(hands, nbPlayers, nbStartCards);
 		 for (int i = 0; i < nbPlayers; i++) {
-			   hands[i].sort(Hand.SortType.SUITPRIORITY, true);
+			   hands[i].sort(Hand.SortType.SUITPRIORITY, true); // 理解：SUITPRIORITY -> 手中牌按照花色排序
 		 }
 		 // Set up human player for interaction
 		CardListener cardListener = new CardAdapter()  // Human Player plays card
@@ -221,10 +228,12 @@ private void playRound() {
     	selected = null;
     	// if (false) {
         if (0 == nextPlayer) {  // Select lead depending on player type
+			// 理解：手动玩家没出牌前，要一直等着
     		hands[0].setTouchEnabled(true);
     		setStatus("Player 0 double-click on card to lead.");
     		while (null == selected) delay(100);
         } else {
+			// 理解：legal player，给2000time，直接出牌
     		setStatusText("Player " + nextPlayer + " thinking...");
             delay(thinkingTime);
             selected = randomCard(hands[nextPlayer]);
