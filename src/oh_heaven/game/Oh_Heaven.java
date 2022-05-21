@@ -13,37 +13,28 @@ import java.util.stream.Collectors;
 public class Oh_Heaven extends CardGame {
 
   final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"}; // 理解：游戏左上角本轮的主导花色
-
   static public final int seed = 30006;
   static final Random random = new Random(seed);
   
   // return random Enum value
   public static <T extends Enum<?>> T randomEnum(Class<T> clazz){
-	  // 理解：clazz.getEnumConstants().length -> 传进来enum的长度（有两个enum：suit（4个花色） & rank（13位牌值，由大到小排序，A最大 K其次））
-	  // random.nextInt(...) -> 在这个长度里随机选个值
-	  // clazz.getEnumConstants()[x] -> 通过indexing获取enum里的值
       int x = random.nextInt(clazz.getEnumConstants().length);
       return clazz.getEnumConstants()[x];
   }
 
   // return random Card from Hand
   public static Card randomCard(Hand hand){
-	  // 理解：hand.getNumberOfCards() -> 查看目前玩家手上有几张牌（即：目前手上牌的数量）
-	  // random.nextInt(...) -> 在这个长度里随机选个值
-	  // hand.get(x); -> 将这张随即牌打出
       int x = random.nextInt(hand.getNumberOfCards());
       return hand.get(x);
   }
  
   // return random Card from ArrayList
   public static Card randomCard(ArrayList<Card> list){
-	  // 理解：随机发牌，用于游戏最开始分配牌给玩家
       int x = random.nextInt(list.size());
       return list.get(x);
   }
   
   private void dealingOut(Hand[] hands, int nbPlayers, int nbCardsPerPlayer) {
-	  // 理解：pack -> 所有的牌，deck.toHand -> 把所有牌给到这个pack，toHand() -> 把牌给到hand
 	  Hand pack = deck.toHand(false);
 	  // pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
 	  for (int i = 0; i < nbCardsPerPlayer; i++) {
@@ -57,9 +48,10 @@ public class Oh_Heaven extends CardGame {
 		  }
 	  }
   }
-  
+
+  // 理解: 比较两张牌的大小（只看数字）
   public boolean rankGreater(Card card1, Card card2) {
-	  return card1.getRankId() < card2.getRankId(); // Warning: Reverse rank order of cards (see comment on enum)
+	  return card1.getRankId() < card2.getRankId();
   }
 	 
   private final String version = "1.0";
@@ -95,15 +87,15 @@ public class Oh_Heaven extends CardGame {
   public void setStatus(String string) { setStatusText(string); }
   
 private int[] scores = new int[nbPlayers];
-private int[] tricks = new int[nbPlayers]; // 理解：记录当前round赢了多少trick
-private int[] bids = new int[nbPlayers]; // 理解：猜自己能赢多少trick
+private int[] tricks = new int[nbPlayers];
+private int[] bids = new int[nbPlayers];
+private ArrayList<Player> players = new ArrayList<>();
 
 Font bigFont = new Font("Serif", Font.BOLD, 36);
 
 private void initScore() {
 	// 理解：初始化分数 -> 屏幕显示
 	 for (int i = 0; i < nbPlayers; i++) {
-		 // scores[i] = 0;
 		 String text = "[" + String.valueOf(scores[i]) + "]" + String.valueOf(tricks[i]) + "/" + String.valueOf(bids[i]);
 		 scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
 		 addActor(scoreActors[i], scoreLocations[i]);
@@ -126,7 +118,6 @@ private void initScores() {
 }
 
 private void updateScores() {
-	// 理解：更新分数的值
 	 for (int i = 0; i < nbPlayers; i++) {
 		 scores[i] += tricks[i];
 		 if (tricks[i] == bids[i]) scores[i] += madeBidBonus; // 理解：如果回合结束，trick数=bid数，额外加10分
@@ -159,9 +150,6 @@ private void initBids(Suit trumps, int nextPlayer) {
 			 bids[iP] += random.nextBoolean() ? -1 : 1;
 		 }
 	 }
-	// for (int i = 0; i < nbPlayers; i++) {
-	// 	 bids[i] = nbStartCards / 4 + 1;
-	//  }
  }
 
 private Card selected;
