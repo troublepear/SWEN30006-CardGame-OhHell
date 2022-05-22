@@ -63,7 +63,7 @@ public class Oh_Heaven extends CardGame {
 		initScores();
 		initScore();
 
-		//
+		// For each round
 		for (int i=0; i <nbRounds; i++) {
 			initTricks();
 			initRound();
@@ -90,62 +90,40 @@ public class Oh_Heaven extends CardGame {
 	}
 
 	/** Initialize Methods */
-	private void initScore() {
-		// 理解：初始化分数 -> 屏幕显示
-		for (int i = 0; i < nbPlayers; i++) {
-			String text = "[" + String.valueOf(scores[i]) + "]" + String.valueOf(tricks[i]) + "/" + String.valueOf(bids[i]);
-			scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[i], scoreLocations[i]);
-		}
-	}
-
-	private void updateScore(int player) {
-		// 理解：更新分数 -> 屏幕显示
-		removeActor(scoreActors[player]);
-		String text = "[" + String.valueOf(scores[player]) + "]" + String.valueOf(tricks[player]) + "/" + String.valueOf(bids[player]);
-		scoreActors[player] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-		addActor(scoreActors[player], scoreLocations[player]);
-	}
-
 	private void initScores() {
-		for (int i = 0; i < nbPlayers; i++) {
-			scores[i] = 0;
+		for (Player player:players){
+			player.setScore(0);
 		}
+
+//		for (int i = 0; i < nbPlayers; i++) {
+//			scores[i] = 0;
+//		}
 	}
 
-	private void updateScores() {
-		for (int i = 0; i < nbPlayers; i++) {
-			scores[i] += tricks[i];
-			if (tricks[i] == bids[i]) scores[i] += madeBidBonus; // 理解：如果回合结束，trick数=bid数，额外加10分
+	private void initScore() {
+		for(Player player:players){
+			int index = player.getIndex();
+			String text = "[" + String.valueOf(player.getScore()) + "]" + String.valueOf(player.getTrick()) + "/" + String.valueOf(player.getBid());
+			scoreActors[index] = new TextActor(text,Color.WHITE,bgColor,bigFont);
+			addActor(scoreActors[index],scoreLocations[index]);
 		}
+
+//		// 理解：初始化分数 -> 屏幕显示
+//		for (int i = 0; i < nbPlayers; i++) {
+//			String text = "[" + String.valueOf(scores[i]) + "]" + String.valueOf(tricks[i]) + "/" + String.valueOf(bids[i]);
+//			scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
+//			addActor(scoreActors[i], scoreLocations[i]);
+//		}
 	}
 
 	private void initTricks() {
-		// 理解：初始化所有玩家trick值为0
-		for (int i = 0; i < nbPlayers; i++) {
-			tricks[i] = 0;
+		for(Player player:players){
+			player.setTrick(0);
 		}
-	}
-
-	private void initBids(Suit trumps, int nextPlayer) {
-		int total = 0;
-		// 理解：nextPlayer初始时为开始玩家，例如：开始为2号玩家，则循环 i=2;i<6（2+4）;i++，正好循环4次
-		for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
-			// 理解：iP=nextPlayer是几号玩家。i % nbPlayers，例如：i=5，则5 % 4 = 1，说明nextPlayer=5为1号玩家
-			int iP = i % nbPlayers;
-			// 理解：nbStartCards=13，13/4=3，再随机加0或1，则玩家的bid随机等于3或4
-			bids[iP] = nbStartCards / 4 + random.nextInt(2);
-			total += bids[iP]; // 理解：计算所有人bids总数
-		}
-		// 理解： 假设total bids等于13，则需要让最后一个玩家bid变大/变小（每round出一张牌，一共13把在一个round里，因此total=13意味着每个人都可能达到bid）
-		if (total == nbStartCards) {  // Force last bid so not every bid possible
-			int iP = (nextPlayer + nbPlayers) % nbPlayers; // 理解：计算最后一个玩家是几号玩家
-			if (bids[iP] == 0) {
-				bids[iP] = 1;
-			} else {
-				bids[iP] += random.nextBoolean() ? -1 : 1;
-			}
-		}
+//		// 理解：初始化所有玩家trick值为0
+//		for (int i = 0; i < nbPlayers; i++) {
+//			tricks[i] = 0;
+//		}
 	}
 
 	private Card selected;
@@ -179,6 +157,141 @@ public class Oh_Heaven extends CardGame {
 		//	      hands[i].setVerso(true);			// You do not need to use or change this code.
 		// End graphics
 	}
+
+	private void playRound() {
+		// Select and display trump suit
+		final Suit trumps = randomEnum(Suit.class);
+		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
+		addActor(trumpsActor, trumpsActorLocation);
+		// End trump suit
+		Hand trick;
+		int winner;
+		Card winningCard;
+		Suit lead;
+		int nextPlayer = random.nextInt(nbPlayers); // randomly select player to lead for this round
+		initBids(trumps, nextPlayer);
+		// initScore();
+		for (int i = 0; i < nbPlayers; i++) updateScore(i);
+		for (int i = 0; i < nbStartCards; i++) {
+			trick = new Hand(deck);
+			selected = null;
+			// if (false) {
+			if (0 == nextPlayer) {  // Select lead depending on player type
+				// 理解：手动玩家没出牌前，要一直等着
+				hands[0].setTouchEnabled(true);
+				setStatus("Player 0 double-click on card to lead.");
+				while (null == selected) delay(100);
+			} else {
+				// 理解：legal player，给2000time，直接出牌
+				setStatusText("Player " + nextPlayer + " thinking...");
+				delay(thinkingTime);
+				selected = randomCard(hands[nextPlayer]);
+			}
+			// Lead with selected card
+			trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
+			trick.draw();
+			selected.setVerso(false);
+			// No restrictions on the card being lead
+			lead = (Suit) selected.getSuit();
+			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
+			winner = nextPlayer;
+			winningCard = selected;
+			// End Lead
+			for (int j = 1; j < nbPlayers; j++) {
+				if (++nextPlayer >= nbPlayers) nextPlayer = 0;  // From last back to first
+				selected = null;
+				// if (false) {
+				if (0 == nextPlayer) {
+					hands[0].setTouchEnabled(true);
+					setStatus("Player 0 double-click on card to follow.");
+					while (null == selected) delay(100);
+				} else {
+					setStatusText("Player " + nextPlayer + " thinking...");
+					delay(thinkingTime);
+					selected = randomCard(hands[nextPlayer]);
+				}
+				// Follow with selected card
+				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
+				trick.draw();
+				selected.setVerso(false);  // In case it is upside down
+				// Check: Following card must follow suit if possible
+				if (selected.getSuit() != lead && hands[nextPlayer].getNumberOfCardsWithSuit(lead) > 0) {
+					// Rule violation
+					String violation = "Follow rule broken by player " + nextPlayer + " attempting to play " + selected;
+					System.out.println(violation);
+					if (enforceRules)
+						try {
+							throw(new BrokeRuleException(violation));
+						} catch (BrokeRuleException e) {
+							e.printStackTrace();
+							System.out.println("A cheating player spoiled the game!");
+							System.exit(0);
+						}
+				}
+				// End Check
+				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
+				System.out.println("winning: " + winningCard);
+				System.out.println(" played: " + selected);
+				// System.out.println("winning: suit = " + winningCard.getSuit() + ", rank = " + (13 - winningCard.getRankId()));
+				// System.out.println(" played: suit = " +    selected.getSuit() + ", rank = " + (13 -    selected.getRankId()));
+				if ( // beat current winner with higher card
+						(selected.getSuit() == winningCard.getSuit() && rankGreater(selected, winningCard)) ||
+								// trumped when non-trump was winning
+								(selected.getSuit() == trumps && winningCard.getSuit() != trumps)) {
+					System.out.println("NEW WINNER");
+					winner = nextPlayer;
+					winningCard = selected;
+				}
+				// End Follow
+			}
+			delay(600);
+			trick.setView(this, new RowLayout(hideLocation, 0));
+			trick.draw();
+			nextPlayer = winner;
+			setStatusText("Player " + nextPlayer + " wins trick.");
+			tricks[nextPlayer]++;
+			updateScore(nextPlayer);
+		}
+		removeActor(trumpsActor);
+	}
+
+	private void updateScores() {
+		for (int i = 0; i < nbPlayers; i++) {
+			scores[i] += tricks[i];
+			if (tricks[i] == bids[i]) scores[i] += madeBidBonus; // 理解：如果回合结束，trick数=bid数，额外加10分
+		}
+	}
+
+	private void updateScore(int player) {
+		// 理解：更新分数 -> 屏幕显示
+		removeActor(scoreActors[player]);
+		String text = "[" + String.valueOf(scores[player]) + "]" + String.valueOf(tricks[player]) + "/" + String.valueOf(bids[player]);
+		scoreActors[player] = new TextActor(text, Color.WHITE, bgColor, bigFont);
+		addActor(scoreActors[player], scoreLocations[player]);
+	}
+
+
+	private void initBids(Suit trumps, int nextPlayer) {
+		int total = 0;
+		// 理解：nextPlayer初始时为开始玩家，例如：开始为2号玩家，则循环 i=2;i<6（2+4）;i++，正好循环4次
+		for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
+			// 理解：iP=nextPlayer是几号玩家。i % nbPlayers，例如：i=5，则5 % 4 = 1，说明nextPlayer=5为1号玩家
+			int iP = i % nbPlayers;
+			// 理解：nbStartCards=13，13/4=3，再随机加0或1，则玩家的bid随机等于3或4
+			bids[iP] = nbStartCards / 4 + random.nextInt(2);
+			total += bids[iP]; // 理解：计算所有人bids总数
+		}
+		// 理解： 假设total bids等于13，则需要让最后一个玩家bid变大/变小（每round出一张牌，一共13把在一个round里，因此total=13意味着每个人都可能达到bid）
+		if (total == nbStartCards) {  // Force last bid so not every bid possible
+			int iP = (nextPlayer + nbPlayers) % nbPlayers; // 理解：计算最后一个玩家是几号玩家
+			if (bids[iP] == 0) {
+				bids[iP] = 1;
+			} else {
+				bids[iP] += random.nextBoolean() ? -1 : 1;
+			}
+		}
+	}
+
 
 
 	/** Other Methods */
@@ -224,101 +337,4 @@ public class Oh_Heaven extends CardGame {
 	  return card1.getRankId() < card2.getRankId();
 	}
 
-
-	private void playRound() {
-		// Select and display trump suit
-			final Suit trumps = randomEnum(Suit.class);
-			final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
-			addActor(trumpsActor, trumpsActorLocation);
-		// End trump suit
-		Hand trick;
-		int winner;
-		Card winningCard;
-		Suit lead;
-		int nextPlayer = random.nextInt(nbPlayers); // randomly select player to lead for this round
-		initBids(trumps, nextPlayer);
-		// initScore();
-		for (int i = 0; i < nbPlayers; i++) updateScore(i);
-		for (int i = 0; i < nbStartCards; i++) {
-			trick = new Hand(deck);
-			selected = null;
-			// if (false) {
-			if (0 == nextPlayer) {  // Select lead depending on player type
-				// 理解：手动玩家没出牌前，要一直等着
-				hands[0].setTouchEnabled(true);
-				setStatus("Player 0 double-click on card to lead.");
-				while (null == selected) delay(100);
-			} else {
-				// 理解：legal player，给2000time，直接出牌
-				setStatusText("Player " + nextPlayer + " thinking...");
-				delay(thinkingTime);
-				selected = randomCard(hands[nextPlayer]);
-			}
-			// Lead with selected card
-				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
-				trick.draw();
-				selected.setVerso(false);
-				// No restrictions on the card being lead
-				lead = (Suit) selected.getSuit();
-				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
-				winner = nextPlayer;
-				winningCard = selected;
-			// End Lead
-			for (int j = 1; j < nbPlayers; j++) {
-				if (++nextPlayer >= nbPlayers) nextPlayer = 0;  // From last back to first
-				selected = null;
-				// if (false) {
-				if (0 == nextPlayer) {
-					hands[0].setTouchEnabled(true);
-					setStatus("Player 0 double-click on card to follow.");
-					while (null == selected) delay(100);
-				} else {
-					setStatusText("Player " + nextPlayer + " thinking...");
-					delay(thinkingTime);
-					selected = randomCard(hands[nextPlayer]);
-				}
-				// Follow with selected card
-					trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
-					trick.draw();
-					selected.setVerso(false);  // In case it is upside down
-					// Check: Following card must follow suit if possible
-						if (selected.getSuit() != lead && hands[nextPlayer].getNumberOfCardsWithSuit(lead) > 0) {
-							 // Rule violation
-							 String violation = "Follow rule broken by player " + nextPlayer + " attempting to play " + selected;
-							 System.out.println(violation);
-							 if (enforceRules)
-								 try {
-									 throw(new BrokeRuleException(violation));
-									} catch (BrokeRuleException e) {
-										e.printStackTrace();
-										System.out.println("A cheating player spoiled the game!");
-										System.exit(0);
-									}
-						 }
-					// End Check
-					 selected.transfer(trick, true); // transfer to trick (includes graphic effect)
-					 System.out.println("winning: " + winningCard);
-					 System.out.println(" played: " + selected);
-					 // System.out.println("winning: suit = " + winningCard.getSuit() + ", rank = " + (13 - winningCard.getRankId()));
-					 // System.out.println(" played: suit = " +    selected.getSuit() + ", rank = " + (13 -    selected.getRankId()));
-					 if ( // beat current winner with higher card
-						 (selected.getSuit() == winningCard.getSuit() && rankGreater(selected, winningCard)) ||
-						  // trumped when non-trump was winning
-						 (selected.getSuit() == trumps && winningCard.getSuit() != trumps)) {
-						 System.out.println("NEW WINNER");
-						 winner = nextPlayer;
-						 winningCard = selected;
-					 }
-				// End Follow
-			}
-			delay(600);
-			trick.setView(this, new RowLayout(hideLocation, 0));
-			trick.draw();
-			nextPlayer = winner;
-			setStatusText("Player " + nextPlayer + " wins trick.");
-			tricks[nextPlayer]++;
-			updateScore(nextPlayer);
-		}
-		removeActor(trumpsActor);
-	}
 }
