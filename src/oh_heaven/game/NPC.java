@@ -1,24 +1,27 @@
 package oh_heaven.game;
 
+import ch.aplu.jcardgame.Card;
+import ch.aplu.jcardgame.Hand;
+
 public class NPC extends Player {
-    private String type;
-    private SelectStrategy strategy;
+    private SelectStrategy selectStrategy;
 
     // Constructor
-    public NPC(int index,String type){
+    public NPC(int index,SelectStrategy selectStrategy){
         super(index);
-        this.type = type;
+        this.selectStrategy = selectStrategy;
     }
 
     // Getter and Setter
-    public String getType() {
-        return type;
-    }
-    public SelectStrategy getStrategy() {
-        return strategy;
+    public SelectStrategy getSelectStrategyStrategy() {
+        return selectStrategy;
     }
     public void setStrategy(SelectStrategy strategy) {
-        this.strategy = strategy;
+        this.selectStrategy = selectStrategy;
+    }
+
+    public Card selectCard(Suit lead){
+        return selectStrategy.selectCard(lead,getHand());
     }
 
 }

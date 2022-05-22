@@ -3,6 +3,7 @@ package oh_heaven.game;
 import ch.aplu.jcardgame.*;
 import ch.aplu.jgamegrid.*;
 import utility.BrokeRuleException;
+import utility.InvalidPlayerException;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -52,14 +53,25 @@ public class Oh_Heaven extends CardGame {
 			if(currentType.equals("human")){
 				players.add(new Interactive(i));
 			}
+			else if(currentType.equals("random")){
+				players.add(new NPC(i,new RandomSelectStrategy()));
+			}
+			else if(currentType.equals("legal")){
+				players.add(new NPC(i,new LegalSelectStrategy()));
+			}
+			else if(currentType.equals("smart")){
+				players.add(new NPC(i,new SmartSelectStrategy()));
+			}
 			else{
-				players.add(new NPC(i,currentType));
+				try {
+					throw(new InvalidPlayerException(currentType));
+				} catch (InvalidPlayerException e) {
+					e.printStackTrace();
+					System.out.println("[players."+ i +"=" + currentType+"] is not a valid type. Check property file!");
+					System.exit(0);
+				}
 			}
 		}
-//		// 测试：打印load出来每个玩家的类型是否正确
-//		for(Player player:players){
-//			System.out.println("Player "+player.getIndex()+" is "+player.getClass().getSimpleName());
-//		}
 
 		// Initialize scores
 		initScore();
@@ -71,7 +83,10 @@ public class Oh_Heaven extends CardGame {
 			playRound();
 			updateScores();
 		};
+
 		for (Player player:players) updateScore(player);
+
+		// Find the winner
 		int maxScore = 0;
 		for(Player player:players){
 			if(player.getScore() > maxScore){
@@ -97,21 +112,28 @@ public class Oh_Heaven extends CardGame {
 		refresh();
 	}
 
-	/** GUI - Display Methods */
+	/** Graphics - Display Methods */
 	private void initScore() {
 		for(Player player:players){
 			int index = player.getIndex();
-			String text = "[" + String.valueOf(player.getScore()) + "]" + String.valueOf(player.getTrick()) + "/" + String.valueOf(player.getBid());
+			String text = "[" + String.valueOf(player.getScore()) + "]" + String.valueOf(player.getTrick())
+						+ "/" + String.valueOf(player.getBid());
 			scoreActors[index] = new TextActor(text,Color.WHITE,bgColor,bigFont);
 			addActor(scoreActors[index],scoreLocations[index]);
 		}
 	}
 
-	/** Initialize Methods */
-	private void initTricks() {
-		for(Player player:players){
-			player.setTrick(0);
-		}
+	private void updateScore(Player player) {
+		int index = player.getIndex();
+		removeActor(scoreActors[index]);
+		String text = "[" + String.valueOf(player.getScore()) + "]" + String.valueOf(player.getTrick())
+					+ "/" + String.valueOf(player.getBid());
+		scoreActors[index] = new TextActor(text, Color.WHITE, bgColor, bigFont);
+		addActor(scoreActors[index], scoreLocations[index]);
+	}
+
+	public void setStatus(String string) {
+		setStatusText(string);
 	}
 
 	private Card selected;
@@ -148,6 +170,13 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
+	/** Initialize Methods */
+	private void initTricks() {
+		for(Player player:players){
+			player.setTrick(0);
+		}
+	}
+
 	private void dealingOut(ArrayList<Player> players, int nbCardsPerPlayer){
 		Hand pack = deck.toHand(false);
 		for (int i = 0; i < nbCardsPerPlayer; i++) {
@@ -166,26 +195,32 @@ public class Oh_Heaven extends CardGame {
 		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
 		addActor(trumpsActor, trumpsActorLocation);
 
-		// End trump suit
 		Hand trick;
 		Player winner;
 		Card winningCard;
 		Suit lead;
+
+		// Randomly select a player to lead
 		Player nextPlayer = players.get(random.nextInt(nbPlayers));
+
+		// Initialize the bids for each player
 		initBids(trumps, nextPlayer);
-		// Display on screen
+
+		// Update score display on the screen
 		for(Player player:players){
 			updateScore(player);
 		}
 
-		// Select lead depending on player type
+		// Lead
 		for (int i=0; i<nbStartCards; i++){
 			trick = new Hand(deck);
 			selected = null;
+
+			// Select lead depending on player type
 			if(nextPlayer instanceof Interactive){
 				nextPlayer.getHand().setTouchEnabled(true);
 				setStatus("Player " + nextPlayer.getIndex() + " double-click on card to lead.");
-				while (null == selected) delay(100);
+				while (selected == null) delay(100);
 			}
 			else {
 				setStatusText("Player " + nextPlayer.getIndex() + " thinking ...");
@@ -197,54 +232,40 @@ public class Oh_Heaven extends CardGame {
 			trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
 			selected.setVerso(false);
+
 			// No restriction on the card being lead
 			lead = (Suit) selected.getSuit();
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
+
+			// Set lead as winner and winning card for now
 			winner = nextPlayer;
 			winningCard = selected;
-			// End lead
+
 			for(int j = 1; j < nbPlayers; j++ ){
-				int index = nextPlayer.getIndex();
-				if(++index >= nbPlayers){
-					nextPlayer = players.get(0);
-				}else{
-					nextPlayer = players.get(index);
-				}
+				nextPlayer = players.get(nextPlayer.getNextIndex());
 				selected = null;
-				if(nextPlayer.getIndex() == 0){
+				if(nextPlayer instanceof Interactive){
 					nextPlayer.getHand().setTouchEnabled(true);
-					setStatus("Player 0 double-click on card to follow.");
+					setStatus("Player " + nextPlayer.getIndex() + " double-click on card to follow.");
 					while (null == selected) delay(100);
 				}
-				else {
+				else{
 					setStatusText("Player " + nextPlayer.getIndex() + " thinking...");
 					delay(thinkingTime);
-					selected = randomCard(nextPlayer.getHand());
+					selected = ((NPC) nextPlayer).selectCard(lead);
 				}
+
 				// Follow with selected card
 				trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
 				selected.setVerso(false);
+
 				// Check: Following card must follow suit if possible
-				if (selected.getSuit() != lead && nextPlayer.getHand().getNumberOfCardsWithSuit(lead) > 0) {
-					// Rule violation
-					String violation = "Follow rule broken by player " + nextPlayer.getIndex() + " attempting to play " + selected;
-					System.out.println(violation);
-					if (enforceRules)
-						try {
-							throw(new BrokeRuleException(violation));
-						} catch (BrokeRuleException e) {
-							e.printStackTrace();
-							System.out.println("A cheating player spoiled the game!");
-							System.exit(0);
-						}
-				}
-				// End Check
+				checkViolation(lead,nextPlayer);
+				// Check: Winner and winning card
 				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
 				System.out.println("winning: " + winningCard);
 				System.out.println(" played: " + selected);
-				// System.out.println("winning: suit = " + winningCard.getSuit() + ", rank = " + (13 - winningCard.getRankId()));
-				// System.out.println(" played: suit = " +    selected.getSuit() + ", rank = " + (13 -    selected.getRankId()));
 				if ( // beat current winner with higher card
 						(selected.getSuit() == winningCard.getSuit() && rankGreater(selected, winningCard)) ||
 								// trumped when non-trump was winning
@@ -254,6 +275,7 @@ public class Oh_Heaven extends CardGame {
 					winningCard = selected;
 				}
 				// End Follow
+
 			}
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
@@ -264,6 +286,22 @@ public class Oh_Heaven extends CardGame {
 			updateScore(nextPlayer);
 		}
 		removeActor(trumpsActor);
+	}
+
+	private void checkViolation(Suit lead, Player nextPlayer){
+		if (selected.getSuit() != lead && nextPlayer.getHand().getNumberOfCardsWithSuit(lead) > 0) {
+			// Rule violation
+			String violation = "Follow rule broken by player " + nextPlayer.getIndex() + " attempting to play " + selected;
+			System.out.println(violation);
+			if (enforceRules)
+				try {
+					throw(new BrokeRuleException(violation));
+				} catch (BrokeRuleException e) {
+					e.printStackTrace();
+					System.out.println("A cheating player spoiled the game!");
+					System.exit(0);
+				}
+		}
 	}
 
 	private void initBids(Suit trumps, Player nextPlayer) {
@@ -280,9 +318,7 @@ public class Oh_Heaven extends CardGame {
 				players.get(iP).setBid(1);
 			}
 			else{
-				int newBid = players.get(iP).getBid();
-				newBid += random.nextBoolean() ? -1:1;
-				players.get(iP).setBid(newBid);
+				players.get(iP).setBid(players.get(iP).getBid() + (random.nextBoolean() ? -1:1));
 			}
 		}
 	}
@@ -296,20 +332,6 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
-	private void updateScore(Player player) {
-		int index = player.getIndex();
-		removeActor(scoreActors[index]);
-		String text = "[" + String.valueOf(players.get(index).getScore()) + "]"
-				+ String.valueOf(players.get(index).getTrick()) + "/"
-				+ String.valueOf(players.get(index).getBid());
-		scoreActors[index] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-		addActor(scoreActors[index], scoreLocations[index]);
-	}
-
-	/** Other Methods */
-	public void setStatus(String string) {
-		setStatusText(string);
-	}
 
 	/** Other Methods */
 	// return random Enum value
@@ -333,6 +355,11 @@ public class Oh_Heaven extends CardGame {
 	// 理解: 比较两张牌的大小（只看数字）
 	public boolean rankGreater(Card card1, Card card2) {
 	  return card1.getRankId() < card2.getRankId();
+	}
+
+	// Getter and Setter
+	public ArrayList<Player> getPlayers(){
+		return players;
 	}
 
 }

@@ -1,6 +1,14 @@
 package oh_heaven.game;
 
 import ch.aplu.jcardgame.*;
+import ch.aplu.jgamegrid.Actor;
+import ch.aplu.jgamegrid.Location;
+import ch.aplu.jgamegrid.TextActor;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Player {
     private int index;
@@ -50,4 +58,15 @@ public abstract class Player {
     public void addTrick(int add){
         this.trick += add;
     }
+
+    public int getNextIndex(){
+        if(this.index == 3){
+            return 0;
+        }
+        else{
+            return this.index+1;
+        }
+    }
+
+
 }
