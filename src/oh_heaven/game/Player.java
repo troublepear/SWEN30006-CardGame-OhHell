@@ -8,6 +8,7 @@ public abstract class Player {
     private int score;
     private int trick;
     private Hand hand;
+    private RowLayout rowLayout;
     private String type;
 
     // Constructor
@@ -42,5 +43,10 @@ public abstract class Player {
     public void setHand(Hand hand){
         this.hand = hand;
     }
-
+    public RowLayout getRowLayout(){
+        return rowLayout;
+    }
+    public void setRowLayout(RowLayout rowLayout) {
+        this.rowLayout = rowLayout;
+    }
 }
