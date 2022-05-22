@@ -49,4 +49,7 @@ public abstract class Player {
     public void setRowLayout(RowLayout rowLayout) {
         this.rowLayout = rowLayout;
     }
+    public void addTrick(int add){
+        this.trick += add;
+    }
 }
