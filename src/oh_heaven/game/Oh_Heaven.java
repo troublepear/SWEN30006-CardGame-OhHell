@@ -195,6 +195,13 @@ public class Oh_Heaven extends CardGame {
 		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
 		addActor(trumpsActor, trumpsActorLocation);
 
+		for(Player player:players){
+			if(player instanceof NPC){
+				((NPC) player).getMyInfo().setTrump(trumps);
+			}
+		}
+
+
 		Hand trick;
 		Player winner;
 		Card winningCard;
@@ -228,6 +235,8 @@ public class Oh_Heaven extends CardGame {
 				selected = randomCard(nextPlayer.getHand());
 			}
 
+
+
 			// Lead with selected card
 			trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
@@ -241,6 +250,14 @@ public class Oh_Heaven extends CardGame {
 			winner = nextPlayer;
 			winningCard = selected;
 
+			// Record information
+			for(Player player:players){
+				if(player instanceof NPC){
+					((NPC) player).getMyInfo().setLead(lead);
+					((NPC) player).getMyInfo().updateCardList(selected);
+				}
+			}
+
 			for(int j = 1; j < nbPlayers; j++ ){
 				nextPlayer = players.get(nextPlayer.getNextIndex());
 				selected = null;
@@ -252,9 +269,14 @@ public class Oh_Heaven extends CardGame {
 				else{
 					setStatusText("Player " + nextPlayer.getIndex() + " thinking...");
 					delay(thinkingTime);
-					selected = ((NPC) nextPlayer).selectCard(lead);
+					selected = ((NPC) nextPlayer).selectCard();
 				}
-
+				// Record information
+				for(Player player:players){
+					if(player instanceof NPC){
+						((NPC) player).getMyInfo().updateCardList(selected);
+					}
+				}
 				// Follow with selected card
 				trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
@@ -267,7 +289,7 @@ public class Oh_Heaven extends CardGame {
 				System.out.println("winning: " + winningCard);
 				System.out.println(" played: " + selected);
 				if ( // beat current winner with higher card
-						(selected.getSuit() == winningCard.getSuit() && rankGreater(selected, winningCard)) ||
+						(selected.getSuit() == winningCard.getSuit() && Rank.rankGreater(selected, winningCard)) ||
 								// trumped when non-trump was winning
 								(selected.getSuit() == trumps && winningCard.getSuit() != trumps)) {
 					System.out.println("NEW WINNER");
@@ -276,6 +298,12 @@ public class Oh_Heaven extends CardGame {
 				}
 				// End Follow
 
+			}
+			// Clear information
+			for(Player player:players){
+				if(player instanceof NPC){
+					((NPC) player).getMyInfo().clearMyInfo();
+				}
 			}
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
@@ -352,10 +380,6 @@ public class Oh_Heaven extends CardGame {
 	  return list.get(x);
 	}
 
-	// 理解: 比较两张牌的大小（只看数字）
-	public boolean rankGreater(Card card1, Card card2) {
-	  return card1.getRankId() < card2.getRankId();
-	}
 
 	// Getter and Setter
 	public ArrayList<Player> getPlayers(){
