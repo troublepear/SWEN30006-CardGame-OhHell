@@ -8,7 +8,7 @@ public abstract class Player {
     private int score;
     private int trick;
     private Hand hand;
-    private SelectStrategy strategy;
+    private String type;
 
     // Constructor
     public Player(int index){
@@ -16,32 +16,31 @@ public abstract class Player {
     }
 
     // Getter and Setter
-    private int getIndex(){
+    public int getIndex(){
         return index;
     }
-    private void setIndex(int index){
+    public void setIndex(int index){
         this.index = index;
     }
-    private int getBid(){
+    public int getBid(){
         return bid;
     }
-    private void setBid(int bid){
+    public void setBid(int bid){
         this.bid = bid;
     }
-    private int getScore(){
+    public int getScore(){
         return score;
     }
-    private void setScore(int score){
+    public void setScore(int score){
         this.score = score;
     }
-    private int getTrick(){return trick;}
-    private void setTrick(int trick){this.trick=trick;}
-    private Hand getHand(){
+    public int getTrick(){return trick;}
+    public void setTrick(int trick){this.trick=trick;}
+    public Hand getHand(){
         return hand;
     }
-    private void setHand(Hand hand){
+    public void setHand(Hand hand){
         this.hand = hand;
     }
-
 
 }
