@@ -4,10 +4,11 @@ import ch.aplu.jcardgame.*;
 
 public abstract class Player {
     private int index;
-    private Hand hand;
     private int bid;
     private int score;
     private int trick;
+    private Hand hand;
+    private SelectStrategy strategy;
 
     // Constructor
     public Player(int index){
