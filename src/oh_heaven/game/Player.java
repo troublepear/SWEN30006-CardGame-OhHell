@@ -14,14 +14,12 @@ public abstract class Player {
     // Constructor
     public Player(int index){
         this.index = index;
+        this.score = 0;
     }
 
     // Getter and Setter
     public int getIndex(){
         return index;
-    }
-    public void setIndex(int index){
-        this.index = index;
     }
     public int getBid(){
         return bid;

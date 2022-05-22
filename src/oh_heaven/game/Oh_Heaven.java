@@ -20,25 +20,22 @@ public class Oh_Heaven extends CardGame {
 	public final int nbRounds;
 	public final int nbPlayers = 4;
 	private ArrayList<Player> players = new ArrayList<>();
-	private Hand[] hands;
-
 	public final int madeBidBonus = 10;
-	private final int handWidth = 400;
-	private final int trickWidth = 40;
 	private final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
+
+	// Location
 	private final Location[] handLocations = {new Location(350, 625), new Location(75, 350), new Location(350, 75), new Location(625, 350)};
 	private final Location[] scoreLocations = {new Location(575, 675), new Location(25, 575), new Location(575, 25), new Location(575, 575)};
-	private Actor[] scoreActors = {null, null, null, null };
 	private final Location trickLocation = new Location(350, 350);
 	private final Location textLocation = new Location(350, 450);
-	private final int thinkingTime = 2000;
-
 	private Location hideLocation = new Location(-500, - 500);
 	private Location trumpsActorLocation = new Location(50, 50);
-	private int[] scores = new int[nbPlayers];
-	private int[] tricks = new int[nbPlayers];
-	private int[] bids = new int[nbPlayers];
-
+	// Actors
+	private Actor[] scoreActors = {null, null, null, null };
+	// Other
+	private final int handWidth = 400;
+	private final int trickWidth = 40;
+	private final int thinkingTime = 2000;
 	Font bigFont = new Font("Serif", Font.BOLD, 36);
 
 	public Oh_Heaven(Properties properties) {
@@ -46,11 +43,10 @@ public class Oh_Heaven extends CardGame {
 		setTitle("Oh_Heaven (V" + version + ") Constructed for UofM SWEN30006 with JGameGrid (www.aplu.ch)");
 		setStatusText("Initializing...");
 
-		// Initialize properties
+		// Initialize game from property file
 		nbStartCards = Integer.parseInt(properties.getProperty("nbStartCards"));
 		enforceRules = Boolean.parseBoolean(properties.getProperty("enforceRules"));
 		nbRounds = Integer.parseInt(properties.getProperty("rounds"));
-		// Initialize players
 		for(int i=0;i<nbPlayers;i++){
 			String currentType = properties.getProperty("players."+i);
 			if(currentType.equals("human")){
@@ -60,13 +56,12 @@ public class Oh_Heaven extends CardGame {
 				players.add(new NPC(i,currentType));
 			}
 		}
-		// 测试：打印load出来每个玩家的类型是否正确
+//		// 测试：打印load出来每个玩家的类型是否正确
 //		for(Player player:players){
 //			System.out.println("Player "+player.getIndex()+" is "+player.getClass().getSimpleName());
 //		}
 
 		// Initialize scores
-		initScores();
 		initScore();
 
 		// For each round
@@ -102,17 +97,7 @@ public class Oh_Heaven extends CardGame {
 		refresh();
 	}
 
-	/** Initialize Methods */
-	private void initScores() {
-		for (Player player:players){
-			player.setScore(0);
-		}
-
-//		for (int i = 0; i < nbPlayers; i++) {
-//			scores[i] = 0;
-//		}
-	}
-
+	/** GUI - Display Methods */
 	private void initScore() {
 		for(Player player:players){
 			int index = player.getIndex();
@@ -120,23 +105,13 @@ public class Oh_Heaven extends CardGame {
 			scoreActors[index] = new TextActor(text,Color.WHITE,bgColor,bigFont);
 			addActor(scoreActors[index],scoreLocations[index]);
 		}
-
-//		// 理解：初始化分数 -> 屏幕显示
-//		for (int i = 0; i < nbPlayers; i++) {
-//			String text = "[" + String.valueOf(scores[i]) + "]" + String.valueOf(tricks[i]) + "/" + String.valueOf(bids[i]);
-//			scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-//			addActor(scoreActors[i], scoreLocations[i]);
-//		}
 	}
 
+	/** Initialize Methods */
 	private void initTricks() {
 		for(Player player:players){
 			player.setTrick(0);
 		}
-//		// 理解：初始化所有玩家trick值为0
-//		for (int i = 0; i < nbPlayers; i++) {
-//			tricks[i] = 0;
-//		}
 	}
 
 	private Card selected;
@@ -148,34 +123,28 @@ public class Oh_Heaven extends CardGame {
 		for(Player player:players){
 			player.getHand().sort(Hand.SortType.SUITPRIORITY, true);
 		}
-
 		// Set up human player for interaction
 		// Human Player plays card
-		CardListener cardListener = new CardAdapter() {
-			public void leftDoubleClicked(Card card) {
-				for(Player player:players){
-					if(player instanceof Interactive){
+		for(Player player:players) {
+			if(player instanceof Interactive){
+				CardListener cardListener = new CardAdapter(){
+					public void leftDoubleClicked(Card card){
 						selected = card;
 						player.getHand().setTouchEnabled(false);
 					}
-				}
-			}
-		};
-		for(Player player:players){
-			if(player instanceof Interactive){
+				};
 				player.getHand().addCardListener(cardListener);
 			}
 		}
-
 		// graphics
 		for(Player player:players){
-			int index = player.getIndex();
-			Hand currentHand = player.getHand();
-			player.setRowLayout(new RowLayout(handLocations[index], handWidth));
-			player.getRowLayout().setRotationAngle(90 * index);
-			currentHand.setView(this,player.getRowLayout());
-			currentHand.setTargetArea(new TargetArea(trickLocation));
-			currentHand.draw();
+			int curIndex = player.getIndex();
+			Hand curHand = player.getHand();
+			player.setRowLayout(new RowLayout(handLocations[curIndex], handWidth));
+			player.getRowLayout().setRotationAngle(90 * curIndex);
+			curHand.setView(this,player.getRowLayout());
+			curHand.setTargetArea(new TargetArea(trickLocation));
+			curHand.draw();
 		}
 	}
 
@@ -213,7 +182,7 @@ public class Oh_Heaven extends CardGame {
 		for (int i=0; i<nbStartCards; i++){
 			trick = new Hand(deck);
 			selected = null;
-			if(nextPlayer.getClass().getSimpleName() == "Interactive"){
+			if(nextPlayer instanceof Interactive){
 				nextPlayer.getHand().setTouchEnabled(true);
 				setStatus("Player " + nextPlayer.getIndex() + " double-click on card to lead.");
 				while (null == selected) delay(100);
@@ -360,7 +329,6 @@ public class Oh_Heaven extends CardGame {
 	  int x = random.nextInt(list.size());
 	  return list.get(x);
 	}
-
 
 	// 理解: 比较两张牌的大小（只看数字）
 	public boolean rankGreater(Card card1, Card card2) {
