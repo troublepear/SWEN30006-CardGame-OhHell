@@ -23,6 +23,7 @@ public class Oh_Heaven extends CardGame {
 	private ArrayList<Player> players = new ArrayList<>();
 	public final int madeBidBonus = 10;
 	private final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
+	private PlayerFactory playerFactory = new PlayerFactory();
 	// Location
 	private final Location[] handLocations = {new Location(350, 625), new Location(75, 350), new Location(350, 75), new Location(625, 350)};
 	private final Location[] scoreLocations = {new Location(575, 675), new Location(25, 575), new Location(575, 25), new Location(575, 575)};
@@ -48,28 +49,9 @@ public class Oh_Heaven extends CardGame {
 		enforceRules = Boolean.parseBoolean(properties.getProperty("enforceRules"));
 		nbRounds = Integer.parseInt(properties.getProperty("rounds"));
 		for(int i=0;i<nbPlayers;i++){
-			String currentType = properties.getProperty("players."+i);
-			if(currentType.equals("human")){
-				players.add(new Interactive(i));
-			}
-			else if(currentType.equals("random")){
-				players.add(new NPC(i,new RandomSelectStrategy()));
-			}
-			else if(currentType.equals("legal")){
-				players.add(new NPC(i,new LegalSelectStrategy()));
-			}
-			else if(currentType.equals("smart")){
-				players.add(new NPC(i,new SmartSelectStrategy()));
-			}
-			else{
-				try {
-					throw(new InvalidPlayerException(currentType));
-				} catch (InvalidPlayerException e) {
-					e.printStackTrace();
-					System.out.println("[players."+ i +"=" + currentType+"] is not a valid type. Check property file!");
-					System.exit(0);
-				}
-			}
+			String type = properties.getProperty("players."+i);
+			Player player = playerFactory.createPlayer(i,type);
+			players.add(player);
 		}
 
 		// Initialize scores
@@ -82,33 +64,9 @@ public class Oh_Heaven extends CardGame {
 			playRound();
 			updateScores();
 		};
-
+		// Update score
 		for (Player player:players) updateScore(player);
-
-		// Find the winner
-		int maxScore = 0;
-		for(Player player:players){
-			if(player.getScore() > maxScore){
-				maxScore = player.getScore();
-			}
-		}
-		Set <Player> winners = new HashSet<>();
-		for(Player player:players){
-			if(player.getScore() == maxScore){
-				winners.add(player);
-			}
-		}
-		String winText;
-		if(winners.size() == 1){
-			winText = "Game over. Winner is player: " + winners.iterator().next().getIndex();
-		}
-		else{
-			winText = "Game Over. Drawn winners are players: " +
-					String.join(", ", winners.stream().map(Player::getIndexString).collect(Collectors.toSet()));
-		}
-		addActor(new Actor("sprites/gameover.gif"), textLocation);
-		setStatusText(winText);
-		refresh();
+		gameOver();
 	}
 
 	/** Graphics - Display Methods */
@@ -157,6 +115,7 @@ public class Oh_Heaven extends CardGame {
 				player.getHand().addCardListener(cardListener);
 			}
 		}
+
 		// graphics
 		for(Player player:players){
 			int curIndex = player.getIndex();
@@ -303,13 +262,12 @@ public class Oh_Heaven extends CardGame {
 					((NPC) player).getMyInfo().clearMyInfo();
 				}
 			}
-
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
 			trick.draw();
 			nextPlayer = winner;
 			setStatusText("Player " + nextPlayer.getIndex() + " wins trick.");
-			nextPlayer.addTrick(1);
+			nextPlayer.setTrick(nextPlayer.getTrick()+1);
 			updateScore(nextPlayer);
 		}
 		removeActor(trumpsActor);
@@ -359,6 +317,34 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
+	/** Game Over Method */
+	private void gameOver(){
+		// Find the winner
+		int maxScore = 0;
+		for(Player player:players){
+			if(player.getScore() > maxScore){
+				maxScore = player.getScore();
+			}
+		}
+		Set <Player> winners = new HashSet<>();
+		for(Player player:players){
+			if(player.getScore() == maxScore){
+				winners.add(player);
+			}
+		}
+		// Display winner
+		String winText;
+		if(winners.size() == 1){
+			winText = "Game over. Winner is player: " + winners.iterator().next().getIndex();
+		}
+		else{
+			winText = "Game Over. Drawn winners are players: " +
+					String.join(", ", winners.stream().map(Player::getIndexString).collect(Collectors.toSet()));
+		}
+		addActor(new Actor("sprites/gameover.gif"), textLocation);
+		setStatusText(winText);
+		refresh();
+	}
 
 	/** Other Methods */
 	// return random Enum value
@@ -378,11 +364,4 @@ public class Oh_Heaven extends CardGame {
 	  int x = random.nextInt(list.size());
 	  return list.get(x);
 	}
-
-
-	// Getter and Setter
-	public ArrayList<Player> getPlayers(){
-		return players;
-	}
-
 }

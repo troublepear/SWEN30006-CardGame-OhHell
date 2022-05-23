@@ -17,7 +17,6 @@ public abstract class Player {
     private int trick;
     private Hand hand;
     private RowLayout rowLayout;
-    private String type;
 
     // Constructor
     public Player(int index){
@@ -55,13 +54,11 @@ public abstract class Player {
     public void setRowLayout(RowLayout rowLayout) {
         this.rowLayout = rowLayout;
     }
-    public void addTrick(int add){
-        this.trick += add;
-    }
+
+    // Other Methods
     public String getIndexString(){
         return String.valueOf(this.index);
     }
-
     public int getNextIndex(){
         if(this.index == 3){
             return 0;
@@ -70,6 +67,7 @@ public abstract class Player {
             return this.index+1;
         }
     }
+
 
 
 }
