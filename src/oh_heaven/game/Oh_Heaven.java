@@ -3,7 +3,6 @@ package oh_heaven.game;
 import ch.aplu.jcardgame.*;
 import ch.aplu.jgamegrid.*;
 import utility.BrokeRuleException;
-import utility.InvalidPlayerException;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -13,9 +12,9 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class Oh_Heaven extends CardGame {
 	final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
-	static public final int seed = 30006;
-	static final Random random = new Random(seed);
 	private final String version = "1.0";
+//	public static final int seed = 30006;
+//	public static final Random random = new Random(seed);
 	public final int nbStartCards;
 	private boolean enforceRules;
 	public final int nbRounds;
@@ -140,7 +139,7 @@ public class Oh_Heaven extends CardGame {
 		for (int i = 0; i < nbCardsPerPlayer; i++) {
 			for(Player player:players){
 				if(pack.isEmpty()) return;
-				Card dealt = randomCard(pack);
+				Card dealt = Helper.randomCard(pack);
 				dealt.removeFromHand(false);
 				player.getHand().insert(dealt,false);
 			}
@@ -149,7 +148,7 @@ public class Oh_Heaven extends CardGame {
 
 	private void playRound(){
 		// Select and display trump suit
-		final Suit trumps = randomEnum(Suit.class);
+		final Suit trumps = Helper.randomEnum(Suit.class);
 		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
 		addActor(trumpsActor, trumpsActorLocation);
 
@@ -159,14 +158,13 @@ public class Oh_Heaven extends CardGame {
 			}
 		}
 
-
 		Hand trick;
 		Player winner;
 		Card winningCard;
 		Suit lead;
 
 		// Randomly select a player to lead
-		Player nextPlayer = players.get(random.nextInt(nbPlayers));
+		Player nextPlayer = players.get(Helper.random.nextInt(nbPlayers));
 
 		// Initialize the bids for each player
 		initBids(trumps, nextPlayer);
@@ -190,7 +188,7 @@ public class Oh_Heaven extends CardGame {
 			else {
 				setStatusText("Player " + nextPlayer.getIndex() + " thinking ...");
 				delay(thinkingTime);
-				selected = randomCard(nextPlayer.getHand());
+				selected = Helper.randomCard(nextPlayer.getHand());
 			}
 
 			// Lead with selected card
@@ -246,7 +244,7 @@ public class Oh_Heaven extends CardGame {
 				System.out.println("winning: " + winningCard);
 				System.out.println(" played: " + selected);
 				if ( // beat current winner with higher card
-						(selected.getSuit() == winningCard.getSuit() && Rank.rankGreater(selected, winningCard)) ||
+						(selected.getSuit() == winningCard.getSuit() && Helper.rankGreater(selected, winningCard)) ||
 								// trumped when non-trump was winning
 								(selected.getSuit() == trumps && winningCard.getSuit() != trumps)) {
 					System.out.println("NEW WINNER");
@@ -294,7 +292,7 @@ public class Oh_Heaven extends CardGame {
 		int nextPlayerIndex = nextPlayer.getIndex();
 		for(int i=nextPlayerIndex;i<nextPlayerIndex+nbPlayers;i++){
 			int iP = i % nbPlayers;
-			players.get(iP).setBid(nbStartCards / 4 + random.nextInt(2));
+			players.get(iP).setBid(nbStartCards / 4 + Helper.random.nextInt(2));
 			total += players.get(iP).getBid();
 		}
 		if(total == nbStartCards){
@@ -303,7 +301,7 @@ public class Oh_Heaven extends CardGame {
 				players.get(iP).setBid(1);
 			}
 			else{
-				players.get(iP).setBid(players.get(iP).getBid() + (random.nextBoolean() ? -1:1));
+				players.get(iP).setBid(players.get(iP).getBid() + (Helper.random.nextBoolean() ? -1:1));
 			}
 		}
 	}
@@ -347,21 +345,6 @@ public class Oh_Heaven extends CardGame {
 	}
 
 	/** Other Methods */
-	// return random Enum value
-	public static <T extends Enum<?>> T randomEnum(Class<T> clazz){
-	  int x = random.nextInt(clazz.getEnumConstants().length);
-	  return clazz.getEnumConstants()[x];
-	}
 
-	// return random Card from Hand
-	public static Card randomCard(Hand hand){
-	  int x = random.nextInt(hand.getNumberOfCards());
-	  return hand.get(x);
-	}
 
-	// return random Card from ArrayList
-	public static Card randomCard(ArrayList<Card> list){
-	  int x = random.nextInt(list.size());
-	  return list.get(x);
-	}
 }

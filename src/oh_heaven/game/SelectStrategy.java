@@ -6,5 +6,6 @@ import ch.aplu.jcardgame.Hand;
 import java.util.List;
 
 public interface SelectStrategy {
-    public Card selectCard(Hand hand, Information myInfo);
+    Card selectCard(Hand hand, Information myInfo);
+    Card selectLeadCard(Hand hand, Information myInfo);
 }

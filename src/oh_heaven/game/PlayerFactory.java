@@ -14,7 +14,7 @@ public class PlayerFactory {
                     throw(new InvalidPlayerException(type));
                 } catch (InvalidPlayerException e) {
                     e.printStackTrace();
-                    System.out.println("[players."+ index +"=" + type + "] is not a valid type. Check property file!");
+                    System.out.println("[players." + index + "=" + type + "] is not a valid type. Check property file!");
                     System.exit(0);
                 }
         }
