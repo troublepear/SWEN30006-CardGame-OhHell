@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class Oh_Heaven extends CardGame {
-	final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"}; // 理解：游戏左上角本轮的主导花色
+	final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
 	static public final int seed = 30006;
 	static final Random random = new Random(seed);
 	private final String version = "1.0";
@@ -23,7 +23,6 @@ public class Oh_Heaven extends CardGame {
 	private ArrayList<Player> players = new ArrayList<>();
 	public final int madeBidBonus = 10;
 	private final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
-
 	// Location
 	private final Location[] handLocations = {new Location(350, 625), new Location(75, 350), new Location(350, 75), new Location(625, 350)};
 	private final Location[] scoreLocations = {new Location(575, 675), new Location(25, 575), new Location(575, 25), new Location(575, 575)};
@@ -105,7 +104,7 @@ public class Oh_Heaven extends CardGame {
 		}
 		else{
 			winText = "Game Over. Drawn winners are players: " +
-					String.join(", ", winners.stream().map(String::valueOf).collect(Collectors.toSet()));
+					String.join(", ", winners.stream().map(Player::getIndexString).collect(Collectors.toSet()));
 		}
 		addActor(new Actor("sprites/gameover.gif"), textLocation);
 		setStatusText(winText);
@@ -235,8 +234,6 @@ public class Oh_Heaven extends CardGame {
 				selected = randomCard(nextPlayer.getHand());
 			}
 
-
-
 			// Lead with selected card
 			trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
@@ -284,6 +281,7 @@ public class Oh_Heaven extends CardGame {
 
 				// Check: Following card must follow suit if possible
 				checkViolation(lead,nextPlayer);
+
 				// Check: Winner and winning card
 				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
 				System.out.println("winning: " + winningCard);
@@ -305,6 +303,7 @@ public class Oh_Heaven extends CardGame {
 					((NPC) player).getMyInfo().clearMyInfo();
 				}
 			}
+
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
 			trick.draw();

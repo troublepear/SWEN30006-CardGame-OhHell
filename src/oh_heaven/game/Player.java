@@ -58,6 +58,9 @@ public abstract class Player {
     public void addTrick(int add){
         this.trick += add;
     }
+    public String getIndexString(){
+        return String.valueOf(this.index);
+    }
 
     public int getNextIndex(){
         if(this.index == 3){

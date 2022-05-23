@@ -12,6 +12,7 @@ public class Information {
     private Suit trump;
     private List<Card> cardList;
 
+    // Constructor
     public Information(int index){
         this.index = index;
         this.cardList = new ArrayList<>();
