@@ -1,7 +1,6 @@
 package oh_heaven.game;
 
 import utility.PropertiesLoader;
-
 import java.util.Properties;
 
 public class GameInitializer {

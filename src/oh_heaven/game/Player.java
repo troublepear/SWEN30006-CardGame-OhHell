@@ -59,6 +59,7 @@ public abstract class Player {
     public String getIndexString(){
         return String.valueOf(this.index);
     }
+
     public int getNextIndex(){
         if(this.index == 3){
             return 0;

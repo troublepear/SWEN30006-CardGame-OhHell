@@ -7,7 +7,6 @@ import java.util.Properties;
 
 public class PropertiesLoader {
     public static final String DEFAULT_DIRECTORY_PATH = "properties/";
-
     public static Properties loadPropertiesFile(String propertiesFile) {
         if (propertiesFile == null) {
             try (InputStream input = new FileInputStream(DEFAULT_DIRECTORY_PATH + "runmode.properties")) {
@@ -16,7 +15,6 @@ public class PropertiesLoader {
                 prop.load(input);
                 propertiesFile = DEFAULT_DIRECTORY_PATH + prop.getProperty("current_mode");
                 System.out.println(propertiesFile);
-
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

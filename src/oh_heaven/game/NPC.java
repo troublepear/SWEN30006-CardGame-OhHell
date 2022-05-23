@@ -24,4 +24,8 @@ public class NPC extends Player {
         return selectStrategy.selectCard(getHand(),myInfo);
     }
 
+    public Card selectLeadCard(){
+        return selectStrategy.selectLeadCard(getHand(),myInfo);
+    }
+
 }

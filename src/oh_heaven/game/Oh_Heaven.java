@@ -90,7 +90,7 @@ public class Oh_Heaven extends CardGame {
 		setStatusText(string);
 	}
 
-	/** Game Started: initialize */
+	/** Game Started: initializing */
 	private void initTricks() {
 		for(Player player:players){
 			player.setTrick(0);
@@ -206,7 +206,7 @@ public class Oh_Heaven extends CardGame {
 			else {
 				setStatusText("Player " + nextPlayer.getIndex() + " thinking ...");
 				delay(thinkingTime);
-				selected = Helper.randomCard(nextPlayer.getHand());
+				selected = ((NPC) nextPlayer).selectLeadCard();
 			}
 
 			// Lead with selected card
