@@ -6,26 +6,41 @@ import ch.aplu.jcardgame.Hand;
 import java.util.List;
 
 public class NPC extends Player {
+    private final int thinkingTime = 2000;
     private SelectStrategy selectStrategy;
     private Information myInfo;
 
     // Constructor
-    public NPC(int index,SelectStrategy selectStrategy){
-        super(index);
+    public NPC(Oh_Heaven game, int index,SelectStrategy selectStrategy){
+        super(game,index);
         this.selectStrategy = selectStrategy;
         this.myInfo = new Information(index);
+    }
+
+    @Override
+    public void play(boolean isLead){
+        getGame().setStatusText("Player " + getIndex() + " thinking ...");
+        getGame().delay(thinkingTime);
+        if(isLead){
+            setSelected(selectLeadCard());
+        }
+        else{
+            setSelected(selectCard());
+        }
+    }
+
+    public Card selectCard(){
+        return selectStrategy.selectCard(getHand(),myInfo);
+    }
+    public Card selectLeadCard(){
+        return selectStrategy.selectLeadCard(getHand(),myInfo);
     }
 
     public Information getMyInfo(){
         return myInfo;
     }
 
-    public Card selectCard(){
-        return selectStrategy.selectCard(getHand(),myInfo);
-    }
 
-    public Card selectLeadCard(){
-        return selectStrategy.selectLeadCard(getHand(),myInfo);
-    }
+
 
 }

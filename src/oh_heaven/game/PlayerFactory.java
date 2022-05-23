@@ -2,13 +2,12 @@ package oh_heaven.game;
 import utility.InvalidPlayerException;
 
 public class PlayerFactory {
-
-    public Player createPlayer(int index,String type) {
+    public Player createPlayer(Oh_Heaven game, int index,String type) {
         switch (type){
-            case "human": return new Interactive(index);
-            case "random": return new NPC(index,new RandomSelectStrategy());
-            case "legal": return new NPC(index,new LegalSelectStrategy());
-            case "smart": return new NPC(index,new SmartSelectStrategy());
+            case "human": return new Interactive(game,index);
+            case "random": return new NPC(game,index,new RandomSelectStrategy());
+            case "legal": return new NPC(game,index,new LegalSelectStrategy());
+            case "smart": return new NPC(game,index,new SmartSelectStrategy());
             default:
                 try {
                     throw(new InvalidPlayerException(type));

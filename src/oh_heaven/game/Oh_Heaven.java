@@ -17,9 +17,9 @@ public class Oh_Heaven extends CardGame {
 	private boolean enforceRules;
 	public final int nbRounds;
 	public final int nbPlayers = 4;
-	private ArrayList<Player> players = new ArrayList<>();
 	public final int madeBidBonus = 10;
 	private final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
+	private ArrayList<Player> players = new ArrayList<>();
 	private PlayerFactory playerFactory = new PlayerFactory();
 	// Location
 	private final Location[] handLocations = {new Location(350, 625), new Location(75, 350), new Location(350, 75), new Location(625, 350)};
@@ -33,7 +33,6 @@ public class Oh_Heaven extends CardGame {
 	// Other
 	private final int handWidth = 400;
 	private final int trickWidth = 40;
-	private final int thinkingTime = 2000;
 	Font bigFont = new Font("Serif", Font.BOLD, 36);
 
 	public Oh_Heaven(Properties properties) {
@@ -47,7 +46,7 @@ public class Oh_Heaven extends CardGame {
 		nbRounds = Integer.parseInt(properties.getProperty("rounds"));
 		for(int i=0;i<nbPlayers;i++){
 			String type = properties.getProperty("players."+i);
-			Player player = playerFactory.createPlayer(i,type);
+			Player player = playerFactory.createPlayer(this,i,type);
 			players.add(player);
 		}
 
@@ -110,13 +109,7 @@ public class Oh_Heaven extends CardGame {
 		// Human Player plays card
 		for(Player player:players) {
 			if(player instanceof Interactive){
-				CardListener cardListener = new CardAdapter(){
-					public void leftDoubleClicked(Card card){
-						selected = card;
-						player.getHand().setTouchEnabled(false);
-					}
-				};
-				player.getHand().addCardListener(cardListener);
+				((Interactive) player).setupCardListener();
 			}
 		}
 
@@ -180,10 +173,8 @@ public class Oh_Heaven extends CardGame {
 		Player winner;
 		Card winningCard;
 		Suit lead;
-
 		// Randomly select a player to lead
 		Player nextPlayer = players.get(Helper.random.nextInt(nbPlayers));
-
 		// Initialize the bids for each player
 		initBids(trumps, nextPlayer);
 
@@ -196,24 +187,12 @@ public class Oh_Heaven extends CardGame {
 		for (int i=0; i<nbStartCards; i++){
 			trick = new Hand(deck);
 			selected = null;
-
-			// Select lead depending on player type
-			if(nextPlayer instanceof Interactive){
-				nextPlayer.getHand().setTouchEnabled(true);
-				setStatus("Player " + nextPlayer.getIndex() + " double-click on card to lead.");
-				while (selected == null) delay(100);
-			}
-			else {
-				setStatusText("Player " + nextPlayer.getIndex() + " thinking ...");
-				delay(thinkingTime);
-				selected = ((NPC) nextPlayer).selectLeadCard();
-			}
-
+			nextPlayer.play(true);
+			selected = nextPlayer.getSelected();
 			// Lead with selected card
 			trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
 			selected.setVerso(false);
-
 			// No restriction on the card being lead
 			lead = (Suit) selected.getSuit();
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
@@ -233,16 +212,8 @@ public class Oh_Heaven extends CardGame {
 			for(int j = 1; j < nbPlayers; j++ ){
 				nextPlayer = players.get(nextPlayer.getNextIndex());
 				selected = null;
-				if(nextPlayer instanceof Interactive){
-					nextPlayer.getHand().setTouchEnabled(true);
-					setStatus("Player " + nextPlayer.getIndex() + " double-click on card to follow.");
-					while (null == selected) delay(100);
-				}
-				else{
-					setStatusText("Player " + nextPlayer.getIndex() + " thinking...");
-					delay(thinkingTime);
-					selected = ((NPC) nextPlayer).selectCard();
-				}
+				nextPlayer.play(false);
+				selected = nextPlayer.getSelected();
 				// Record information
 				for(Player player:players){
 					if(player instanceof NPC){
