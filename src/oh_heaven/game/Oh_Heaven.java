@@ -193,10 +193,8 @@ public class Oh_Heaven extends CardGame {
 			trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
 			selected.setVerso(false);
-			// No restriction on the card being lead
-			lead = (Suit) selected.getSuit();
+			lead = (Suit) selected.getSuit(); // No restriction on the card being lead
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
-
 			// Set lead as winner and winning card for now
 			winner = nextPlayer;
 			winningCard = selected;
@@ -210,7 +208,7 @@ public class Oh_Heaven extends CardGame {
 			}
 
 			for(int j = 1; j < nbPlayers; j++ ){
-				nextPlayer = players.get(nextPlayer.getNextIndex());
+				nextPlayer = players.get(nextPlayer.getNextIndex()); // Switch to next player
 				selected = null;
 				nextPlayer.play(false);
 				selected = nextPlayer.getSelected();
@@ -225,8 +223,7 @@ public class Oh_Heaven extends CardGame {
 				trick.draw();
 				selected.setVerso(false);
 
-				// Check: Following card must follow suit if possible
-				checkViolation(lead,nextPlayer);
+				checkViolation(lead,nextPlayer); // Check: Following card must follow suit if possible
 
 				// Check: Winner and winning card
 				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
