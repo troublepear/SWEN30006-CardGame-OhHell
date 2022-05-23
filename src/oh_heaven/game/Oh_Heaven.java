@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 public class Oh_Heaven extends CardGame {
 	final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
 	private final String version = "1.0";
-//	public static final int seed = 30006;
-//	public static final Random random = new Random(seed);
 	public final int nbStartCards;
 	private boolean enforceRules;
 	public final int nbRounds;
@@ -68,7 +66,7 @@ public class Oh_Heaven extends CardGame {
 		gameOver();
 	}
 
-	/** Graphics - Display Methods */
+	/** Graphics - Display  */
 	private void initScore() {
 		for(Player player:players){
 			int index = player.getIndex();
@@ -90,6 +88,13 @@ public class Oh_Heaven extends CardGame {
 
 	public void setStatus(String string) {
 		setStatusText(string);
+	}
+
+	/** Game Started: initialize */
+	private void initTricks() {
+		for(Player player:players){
+			player.setTrick(0);
+		}
 	}
 
 	private Card selected;
@@ -127,10 +132,22 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
-	/** Initialize Methods */
-	private void initTricks() {
-		for(Player player:players){
-			player.setTrick(0);
+	private void initBids(Suit trumps, Player nextPlayer) {
+		int total = 0;
+		int nextPlayerIndex = nextPlayer.getIndex();
+		for(int i=nextPlayerIndex;i<nextPlayerIndex+nbPlayers;i++){
+			int iP = i % nbPlayers;
+			players.get(iP).setBid(nbStartCards / 4 + Helper.random.nextInt(2));
+			total += players.get(iP).getBid();
+		}
+		if(total == nbStartCards){
+			int iP = (nextPlayerIndex + nbPlayers) % nbPlayers;
+			if(players.get(iP).getBid() == 0){
+				players.get(iP).setBid(1);
+			}
+			else{
+				players.get(iP).setBid(players.get(iP).getBid() + (Helper.random.nextBoolean() ? -1:1));
+			}
 		}
 	}
 
@@ -146,6 +163,7 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
+	/** Game Started: in game */
 	private void playRound(){
 		// Select and display trump suit
 		final Suit trumps = Helper.randomEnum(Suit.class);
@@ -271,6 +289,15 @@ public class Oh_Heaven extends CardGame {
 		removeActor(trumpsActor);
 	}
 
+	private void updateScores() {
+		for(Player player:players){
+			player.setScore(player.getScore()+player.getTrick());
+			if(player.getTrick() == player.getBid()){
+				player.setScore(player.getScore()+madeBidBonus);
+			}
+		}
+	}
+
 	private void checkViolation(Suit lead, Player nextPlayer){
 		if (selected.getSuit() != lead && nextPlayer.getHand().getNumberOfCardsWithSuit(lead) > 0) {
 			// Rule violation
@@ -287,35 +314,7 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
-	private void initBids(Suit trumps, Player nextPlayer) {
-		int total = 0;
-		int nextPlayerIndex = nextPlayer.getIndex();
-		for(int i=nextPlayerIndex;i<nextPlayerIndex+nbPlayers;i++){
-			int iP = i % nbPlayers;
-			players.get(iP).setBid(nbStartCards / 4 + Helper.random.nextInt(2));
-			total += players.get(iP).getBid();
-		}
-		if(total == nbStartCards){
-			int iP = (nextPlayerIndex + nbPlayers) % nbPlayers;
-			if(players.get(iP).getBid() == 0){
-				players.get(iP).setBid(1);
-			}
-			else{
-				players.get(iP).setBid(players.get(iP).getBid() + (Helper.random.nextBoolean() ? -1:1));
-			}
-		}
-	}
-
-	private void updateScores() {
-		for(Player player:players){
-			player.setScore(player.getScore()+player.getTrick());
-			if(player.getTrick() == player.getBid()){
-				player.setScore(player.getScore()+madeBidBonus);
-			}
-		}
-	}
-
-	/** Game Over Method */
+	/** Game Over */
 	private void gameOver(){
 		// Find the winner
 		int maxScore = 0;
@@ -343,8 +342,4 @@ public class Oh_Heaven extends CardGame {
 		setStatusText(winText);
 		refresh();
 	}
-
-	/** Other Methods */
-
-
 }
