@@ -163,25 +163,17 @@ public class Oh_Heaven extends CardGame {
 		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
 		addActor(trumpsActor, trumpsActorLocation);
 
-		for(Player player:players){
-			if(player instanceof NPC){
-				((NPC) player).getMyInfo().setTrump(trumps);
-			}
-		}
+		updateInformation(-1,trumps); // Update trump information for NPC player
 
 		Hand trick;
 		Player winner;
 		Card winningCard;
 		Suit lead;
-		// Randomly select a player to lead
-		Player nextPlayer = players.get(Helper.random.nextInt(nbPlayers));
-		// Initialize the bids for each player
-		initBids(trumps, nextPlayer);
+		Player nextPlayer = players.get(Helper.random.nextInt(nbPlayers)); // Randomly select a player to lead
+		initBids(trumps, nextPlayer); // Initialize the bids for each player
 
 		// Update score display on the screen
-		for(Player player:players){
-			updateScore(player);
-		}
+		for(Player player:players) updateScore(player);
 
 		// Lead
 		for (int i=0; i<nbStartCards; i++){
@@ -195,29 +187,19 @@ public class Oh_Heaven extends CardGame {
 			selected.setVerso(false);
 			lead = (Suit) selected.getSuit(); // No restriction on the card being lead
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
+
 			// Set lead as winner and winning card for now
 			winner = nextPlayer;
 			winningCard = selected;
 
-			// Record information
-			for(Player player:players){
-				if(player instanceof NPC){
-					((NPC) player).getMyInfo().setLead(lead);
-					((NPC) player).getMyInfo().updateCardList(selected);
-				}
-			}
+			updateInformation(i,lead); // Update lead information for NPC player
 
 			for(int j = 1; j < nbPlayers; j++ ){
 				nextPlayer = players.get(nextPlayer.getNextIndex()); // Switch to next player
 				selected = null;
 				nextPlayer.play(false);
 				selected = nextPlayer.getSelected();
-				// Record information
-				for(Player player:players){
-					if(player instanceof NPC){
-						((NPC) player).getMyInfo().updateCardList(selected);
-					}
-				}
+
 				// Follow with selected card
 				trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
@@ -238,13 +220,6 @@ public class Oh_Heaven extends CardGame {
 					winningCard = selected;
 				}
 				// End Follow
-
-			}
-			// Clear information
-			for(Player player:players){
-				if(player instanceof NPC){
-					((NPC) player).getMyInfo().clearMyInfo();
-				}
 			}
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
@@ -279,6 +254,15 @@ public class Oh_Heaven extends CardGame {
 					System.out.println("A cheating player spoiled the game!");
 					System.exit(0);
 				}
+		}
+	}
+
+	private void updateInformation(int nb,Suit suit){
+		for(Player player:players){
+			if(player instanceof NPC){  // ONLY update for NPC player
+				if(nb == -1) ((NPC) player).getMyInfo().updateTrump(suit); // Update trump suit
+				else ((NPC) player).getMyInfo().updateLead(suit); // Update lead suit
+			}
 		}
 	}
 

@@ -17,6 +17,11 @@ public class NPC extends Player {
         this.myInfo = new Information(index);
     }
 
+    // Getter and Setter
+    public Information getMyInfo(){
+        return myInfo;
+    }
+
     @Override
     public void play(boolean isLead){
         getGame().setStatusText("Player " + getIndex() + " thinking ...");
@@ -32,15 +37,10 @@ public class NPC extends Player {
     public Card selectCard(){
         return selectStrategy.selectCard(getHand(),myInfo);
     }
+
     public Card selectLeadCard(){
         return selectStrategy.selectLeadCard(getHand(),myInfo);
     }
-
-    public Information getMyInfo(){
-        return myInfo;
-    }
-
-
 
 
 }

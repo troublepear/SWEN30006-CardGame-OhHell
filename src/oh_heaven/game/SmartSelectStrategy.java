@@ -4,7 +4,6 @@ import ch.aplu.jcardgame.Card;
 import ch.aplu.jcardgame.Hand;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class SmartSelectStrategy implements SelectStrategy{
 
@@ -14,11 +13,10 @@ public class SmartSelectStrategy implements SelectStrategy{
         Suit lead = myInfo.getLead();
         Suit trump = myInfo.getTrump();
 
-        List<Card> sameLead = hand.getCardsWithSuit(lead);
+        ArrayList<Card> sameLead = hand.getCardsWithSuit(lead);
         // Has the card to follow lead
         if(sameLead.size() != 0){
-            Card randomCard = sameLead.get(Helper.random.nextInt(sameLead.size()));
-            return randomCard;
+            return Helper.randomCard(sameLead);
         }
 
         // No card to follow lead
