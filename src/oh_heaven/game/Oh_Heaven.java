@@ -176,6 +176,7 @@ public class Oh_Heaven extends CardGame {
 			selected = null;
 			nextPlayer.play(true);
 			selected = nextPlayer.getSelected();
+			nextPlayer.setSelected(null);
 			// Lead with selected card
 			trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
@@ -194,6 +195,7 @@ public class Oh_Heaven extends CardGame {
 				selected = null;
 				nextPlayer.play(false);
 				selected = nextPlayer.getSelected();
+				nextPlayer.setSelected(null);
 
 				// Follow with selected card
 				trick.setView(this,new RowLayout(trickLocation,(trick.getNumberOfCards()+2)*trickWidth));

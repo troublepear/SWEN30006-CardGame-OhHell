@@ -14,8 +14,14 @@ public class HumanPlayer extends Player{
     @Override
     public void play(boolean isLead){
         this.getHand().setTouchEnabled(true);
-        getGame().setStatus("Player " + getIndex() + " double-click on card to lead.");
+        if (isLead) {
+            getGame().setStatus("Player " + getIndex() + " double-click on card to lead.");
+        }
+        else{
+            getGame().setStatus("Player " + getIndex() + " double-click on card to follow.");
+        }
         while(getSelected() == null) getGame().delay(100);
+        getHand().setTouchEnabled(false);
     }
 
     public void setupCardListener() {
