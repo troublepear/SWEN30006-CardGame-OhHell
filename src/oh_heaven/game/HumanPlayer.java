@@ -4,10 +4,10 @@ import ch.aplu.jcardgame.Card;
 import ch.aplu.jcardgame.CardAdapter;
 import ch.aplu.jcardgame.CardListener;
 
-public class Interactive extends Player{
+public class HumanPlayer extends Player{
 
     // Constructor
-    public Interactive(Oh_Heaven game, int index){
+    public HumanPlayer(Oh_Heaven game, int index){
         super(game,index);
     }
 

@@ -1,17 +1,14 @@
 package oh_heaven.game;
 
 import ch.aplu.jcardgame.Card;
-import ch.aplu.jcardgame.Hand;
 
-import java.util.List;
-
-public class NPC extends Player {
+public class NPCPlayer extends Player {
     private final int thinkingTime = 2000;
     private SelectStrategy selectStrategy;
     private Information myInfo;
 
     // Constructor
-    public NPC(Oh_Heaven game, int index,SelectStrategy selectStrategy){
+    public NPCPlayer(Oh_Heaven game, int index, SelectStrategy selectStrategy){
         super(game,index);
         this.selectStrategy = selectStrategy;
         this.myInfo = new Information(index);

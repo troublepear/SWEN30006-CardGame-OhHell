@@ -103,8 +103,8 @@ public class Oh_Heaven extends CardGame {
 		// Set up human player for interaction
 		// Human Player plays card
 		for(Player player:players) {
-			if(player instanceof Interactive){
-				((Interactive) player).setupCardListener();
+			if(player instanceof HumanPlayer){
+				((HumanPlayer) player).setupCardListener();
 			}
 		}
 
@@ -254,9 +254,9 @@ public class Oh_Heaven extends CardGame {
 
 	private void updateInformation(int nb,Suit suit){
 		for(Player player:players){
-			if(player instanceof NPC){  // ONLY update for NPC player
-				if(nb == -1) ((NPC) player).getMyInfo().updateTrump(suit); // Update trump suit
-				else ((NPC) player).getMyInfo().updateLead(suit); // Update lead suit
+			if(player instanceof NPCPlayer){  // ONLY update for NPC player
+				if(nb == -1) ((NPCPlayer) player).getMyInfo().updateTrump(suit); // Update trump suit
+				else ((NPCPlayer) player).getMyInfo().updateLead(suit); // Update lead suit
 			}
 		}
 	}
