@@ -24,18 +24,18 @@ public class NPCPlayer extends Player {
         getGame().setStatusText("Player " + getIndex() + " thinking ...");
         getGame().delay(thinkingTime);
         if(isLead){
-            setSelected(selectLeadCard());
+            setSelected(playLeadCard());
         }
         else{
-            setSelected(selectCard());
+            setSelected(playCard());
         }
     }
 
-    public Card selectCard(){
+    public Card playCard(){
         return selectStrategy.selectCard(getHand(),myInfo);
     }
 
-    public Card selectLeadCard(){
+    public Card playLeadCard(){
         return selectStrategy.selectLeadCard(getHand(),myInfo);
     }
 

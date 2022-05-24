@@ -291,4 +291,5 @@ public class Oh_Heaven extends CardGame {
 		setStatusText(winText);
 		refresh();
 	}
+
 }
