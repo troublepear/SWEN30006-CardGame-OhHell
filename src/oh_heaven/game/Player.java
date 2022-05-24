@@ -59,6 +59,9 @@ public abstract class Player {
         return this.game;
     }
 
+    // Abstract method
+    public abstract void play(boolean isLead);
+
     // Other Methods
     public String getIndexString(){
         return String.valueOf(this.index);
@@ -71,9 +74,4 @@ public abstract class Player {
             return this.index+1;
         }
     }
-
-    public abstract void play(boolean isLead);
-
-
-
 }

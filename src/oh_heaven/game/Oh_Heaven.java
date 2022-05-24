@@ -39,8 +39,7 @@ public class Oh_Heaven extends CardGame {
 		super(700, 700, 30);
 		setTitle("Oh_Heaven (V" + version + ") Constructed for UofM SWEN30006 with JGameGrid (www.aplu.ch)");
 		setStatusText("Initializing...");
-
-		// Initialize game from property file
+		// Read from property file
 		nbStartCards = Integer.parseInt(properties.getProperty("nbStartCards"));
 		enforceRules = Boolean.parseBoolean(properties.getProperty("enforceRules"));
 		nbRounds = Integer.parseInt(properties.getProperty("rounds"));
@@ -49,20 +48,16 @@ public class Oh_Heaven extends CardGame {
 			Player player = playerFactory.createPlayer(this,i,type);
 			players.add(player);
 		}
-
-		// Initialize scores
-		initScore();
-
-		// For each round
+		// Game starts
+		initScore(); // Initialize scores
 		for (int i=0; i <nbRounds; i++) {
 			initTricks();
 			initRound();
 			playRound();
 			updateScores();
 		};
-		// Update score
-		for (Player player:players) updateScore(player);
-		gameOver();
+		for (Player player:players) updateScore(player); // Update score
+		gameOver(); // Game over
 	}
 
 	/** Graphics - Display  */

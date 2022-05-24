@@ -6,7 +6,6 @@ import ch.aplu.jcardgame.Hand;
 import java.util.ArrayList;
 
 public class SmartSelectStrategy implements SelectStrategy{
-
     @Override
     public Card selectCard(Hand hand, Information myInfo) {
         // Information
