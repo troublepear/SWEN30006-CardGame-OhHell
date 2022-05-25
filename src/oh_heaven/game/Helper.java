@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Helper {
-
-
     static final int seed = 30006;
     static final Random random = new Random(seed);
 

@@ -7,7 +7,8 @@ import java.util.ArrayList;
 
 public class LegalSelectStrategy implements SelectStrategy {
     @Override
-    public Card selectCard(Hand hand, Information myInfo) {
+    public Card selectCard(Hand hand,Information myInfo) {
+        // Information
         Suit lead = myInfo.getLead();
         ArrayList<Card> sameSuit = hand.getCardsWithSuit(lead);
         if(sameSuit.size() != 0){
@@ -19,7 +20,8 @@ public class LegalSelectStrategy implements SelectStrategy {
     }
 
     @Override
-    public Card selectLeadCard(Hand hand, Information myInfo){
+    public Card selectLeadCard(Hand hand,Information myInfo){
+        // Information
         return Helper.randomCard(hand);
     }
 

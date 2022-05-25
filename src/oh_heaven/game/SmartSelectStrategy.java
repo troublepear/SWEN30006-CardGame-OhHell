@@ -11,10 +11,13 @@ public class SmartSelectStrategy implements SelectStrategy{
         // Information
         Suit lead = myInfo.getLead();
         Suit trump = myInfo.getTrump();
+        Hand trickHand = myInfo.getTrickHand();
+        trickHand.sort(Hand.SortType.SUITPRIORITY, true);
 
         ArrayList<Card> sameLead = hand.getCardsWithSuit(lead);
         // Has the card to follow lead
         if(sameLead.size() != 0){
+            System.out.println(trickHand);
             return Helper.randomCard(sameLead);
         }
 
@@ -36,4 +39,5 @@ public class SmartSelectStrategy implements SelectStrategy{
     public Card selectLeadCard(Hand hand, Information myInfo){
         return Helper.randomCard(hand);
     }
+
 }

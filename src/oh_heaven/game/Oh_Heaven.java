@@ -21,6 +21,7 @@ public class Oh_Heaven extends CardGame {
 	private final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
 	private ArrayList<Player> players = new ArrayList<>();
 	private PlayerFactory playerFactory = new PlayerFactory();
+	private SelectStrategy strategy;
 	// Location
 	private final Location[] handLocations = {new Location(350, 625), new Location(75, 350), new Location(350, 75), new Location(625, 350)};
 	private final Location[] scoreLocations = {new Location(575, 675), new Location(25, 575), new Location(575, 25), new Location(575, 575)};
@@ -107,7 +108,6 @@ public class Oh_Heaven extends CardGame {
 				((HumanPlayer) player).setupCardListener();
 			}
 		}
-
 		// graphics
 		for(Player player:players){
 			int curIndex = player.getIndex();
@@ -158,7 +158,7 @@ public class Oh_Heaven extends CardGame {
 		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
 		addActor(trumpsActor, trumpsActorLocation);
 
-		updateInformation(-1,trumps); // Update trump information for NPC player
+		updateInformation(-1,trumps,null); // Update trump information for NPC player
 
 		Hand trick;
 		Player winner;
@@ -188,7 +188,7 @@ public class Oh_Heaven extends CardGame {
 			winner = nextPlayer;
 			winningCard = selected;
 
-			updateInformation(i,lead); // Update lead information for NPC player
+			updateInformation(i,lead,trick); // Update lead information for NPC player
 
 			for(int j = 1; j < nbPlayers; j++ ){
 				nextPlayer = players.get(nextPlayer.getNextIndex()); // Switch to next player
@@ -206,6 +206,9 @@ public class Oh_Heaven extends CardGame {
 
 				// Check: Winner and winning card
 				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
+
+				updateInformation(i,lead,trick); // Update lead information for NPC player
+
 				System.out.println("winning: " + winningCard);
 				System.out.println(" played: " + selected);
 				if ( // beat current winner with higher card
@@ -254,11 +257,18 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
-	private void updateInformation(int nb,Suit suit){
+	private void updateInformation(int nb,Suit suit, Hand trickHand){
 		for(Player player:players){
 			if(player instanceof NPCPlayer){  // ONLY update for NPC player
-				if(nb == -1) ((NPCPlayer) player).getMyInfo().updateTrump(suit); // Update trump suit
-				else ((NPCPlayer) player).getMyInfo().updateLead(suit); // Update lead suit
+				// Update trump and lead suit for all non-random players
+				if(!(((NPCPlayer) player).getSelectStrategy() instanceof RandomSelectStrategy)){
+					if(nb == -1) ((NPCPlayer) player).getMyInfo().updateTrump(suit); // Update trump suit
+					else ((NPCPlayer) player).getMyInfo().updateLead(suit); // Update lead suit
+				}
+				// Update information for all smart players
+				if(((NPCPlayer) player).getSelectStrategy() instanceof SmartSelectStrategy){
+					((NPCPlayer) player).getMyInfo().updateTrickHand(trickHand);
+				}
 			}
 		}
 	}

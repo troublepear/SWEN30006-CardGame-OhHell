@@ -18,6 +18,10 @@ public class NPCPlayer extends Player {
     public Information getMyInfo(){
         return myInfo;
     }
+    public  SelectStrategy getSelectStrategy(){return this.selectStrategy;}
+    public void setSelectStrategy(SelectStrategy newSelectStrategy){
+        this.selectStrategy = newSelectStrategy;
+    }
 
     @Override
     public void play(boolean isLead){

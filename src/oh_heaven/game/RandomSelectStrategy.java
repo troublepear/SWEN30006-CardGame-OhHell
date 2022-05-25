@@ -6,12 +6,12 @@ import ch.aplu.jcardgame.Hand;
 public class RandomSelectStrategy implements SelectStrategy {
 
     @Override
-    public Card selectCard(Hand hand, Information myInfo){
+    public Card selectCard(Hand hand,Information myInfo){
         return Helper.randomCard(hand);
     }
 
     @Override
-    public Card selectLeadCard(Hand hand, Information myInfo){
+    public Card selectLeadCard(Hand hand,Information myInfo){
         return Helper.randomCard(hand);
     }
 }
