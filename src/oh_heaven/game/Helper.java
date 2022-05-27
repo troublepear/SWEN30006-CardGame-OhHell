@@ -4,11 +4,23 @@ import ch.aplu.jcardgame.Card;
 import ch.aplu.jcardgame.Hand;
 
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.Random;
 
-public class Helper {
-    static final int seed = 30006;
-    static final Random random = new Random(seed);
+public class Helper{
+
+    static int seed;
+    static Random random;
+
+    public Helper(Properties properties){
+        if(properties.getProperty("seed").equals(null) || properties.getProperty("seed").equals("")){
+            this.random = new Random();
+        }
+        else{
+            this.seed = Integer.parseInt(properties.getProperty("seed"));
+            this.random = new Random(seed);
+        }
+    }
 
     // return random Enum value
     public static <T extends Enum<?>> T randomEnum(Class<T> clazz){

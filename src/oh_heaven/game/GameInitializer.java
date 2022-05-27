@@ -13,6 +13,7 @@ public class GameInitializer {
         else {
             properties = PropertiesLoader.loadPropertiesFile(args[0]);
         }
+        new Helper(properties);
         new Oh_Heaven(properties);
     }
 }
