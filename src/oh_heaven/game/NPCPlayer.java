@@ -24,24 +24,17 @@ public class NPCPlayer extends Player {
     }
 
     @Override
-    public void play(boolean isLead){
+    public void playLead(){
         getGame().setStatusText("Player " + getIndex() + " thinking ...");
         getGame().delay(thinkingTime);
-        if(isLead){
-            setSelected(playLeadCard());
-        }
-        else{
-            setSelected(playCard());
-        }
+        setSelected(selectStrategy.selectLeadCard(getHand(),myInfo));
     }
 
-    public Card playCard(){
-        return selectStrategy.selectCard(getHand(),myInfo);
+    @Override
+    public void playFollow(){
+        getGame().setStatusText("Player " + getIndex() + " thinking ...");
+        getGame().delay(thinkingTime);
+        setSelected(selectStrategy.selectCard(getHand(),myInfo));
     }
-
-    public Card playLeadCard(){
-        return selectStrategy.selectLeadCard(getHand(),myInfo);
-    }
-
 
 }

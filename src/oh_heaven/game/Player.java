@@ -60,7 +60,8 @@ public abstract class Player {
     }
 
     // Abstract method
-    public abstract void play(boolean isLead);
+    public abstract void playFollow();
+    public abstract void playLead();
 
     // Other Methods
     public String getIndexString(){

@@ -8,10 +8,8 @@ import java.util.Properties;
 import java.util.Random;
 
 public class Helper{
-
     static int seed;
     static Random random;
-
     public Helper(Properties properties){
         if(properties.getProperty("seed").equals(null) || properties.getProperty("seed").equals("")){
             this.random = new Random();
@@ -44,4 +42,5 @@ public class Helper{
     public static boolean rankGreater(Card card1, Card card2) {
         return card1.getRankId() < card2.getRankId();
     }
+
 }

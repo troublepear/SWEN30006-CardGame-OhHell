@@ -174,7 +174,7 @@ public class Oh_Heaven extends CardGame {
 		for (int i=0; i<nbStartCards; i++){
 			trick = new Hand(deck);
 			selected = null;
-			nextPlayer.play(true);
+			nextPlayer.playLead();
 			selected = nextPlayer.getSelected();
 			nextPlayer.setSelected(null);
 			// Lead with selected card
@@ -193,7 +193,7 @@ public class Oh_Heaven extends CardGame {
 			for(int j = 1; j < nbPlayers; j++ ){
 				nextPlayer = players.get(nextPlayer.getNextIndex()); // Switch to next player
 				selected = null;
-				nextPlayer.play(false);
+				nextPlayer.playFollow();
 				selected = nextPlayer.getSelected();
 				nextPlayer.setSelected(null);
 
