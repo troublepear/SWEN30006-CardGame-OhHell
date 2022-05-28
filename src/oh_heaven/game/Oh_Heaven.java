@@ -259,14 +259,16 @@ public class Oh_Heaven extends CardGame {
 
 	private void updateInformation(int nb,Suit suit, Hand trickHand){
 		for(Player player:players){
-			if(player instanceof NPCPlayer){  // ONLY update for NPC player
+			// ONLY update for NPC player
+			if(player instanceof NPCPlayer){
+				SelectStrategy type = ((NPCPlayer) player).getSelectStrategy();
 				// Update trump and lead suit for all non-random players
-				if(!(((NPCPlayer) player).getSelectStrategy() instanceof RandomSelectStrategy)){
+				if(!(type instanceof RandomSelectStrategy)){
 					if(nb == -1) ((NPCPlayer) player).getMyInfo().updateTrump(suit); // Update trump suit
 					else ((NPCPlayer) player).getMyInfo().updateLead(suit); // Update lead suit
 				}
 				// Update information for all smart players
-				if(((NPCPlayer) player).getSelectStrategy() instanceof SmartSelectStrategy){
+				if(type instanceof SmartSelectStrategy){
 					((NPCPlayer) player).getMyInfo().updateTrickHand(trickHand);
 				}
 			}
